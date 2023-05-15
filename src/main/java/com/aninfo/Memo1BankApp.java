@@ -1,6 +1,7 @@
 package com.aninfo;
 
 import com.aninfo.model.Account;
+import com.aninfo.model.Transaction;
 import com.aninfo.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -42,10 +43,21 @@ public class Memo1BankApp {
 		return accountService.getAccounts();
 	}
 
+	@GetMapping("/transactions")
+	public Collection<Transaction> getTransactions() {
+		return accountService.getTransactions();
+	}
+
 	@GetMapping("/accounts/{cbu}")
 	public ResponseEntity<Account> getAccount(@PathVariable Long cbu) {
 		Optional<Account> accountOptional = accountService.findById(cbu);
 		return ResponseEntity.of(accountOptional);
+	}
+
+	@GetMapping("/transactions/{cbu}")
+	public Collection<Transaction> getTransactionsOfAccount(@PathVariable Long cbu) {
+		Collection<Transaction> transactions = accountService.findTransactionByCbu(cbu);
+		return transactions;
 	}
 
 	@PutMapping("/accounts/{cbu}")
@@ -65,13 +77,20 @@ public class Memo1BankApp {
 		accountService.deleteById(cbu);
 	}
 
+	@DeleteMapping("/transactions/{id}")
+	public void deleteTransaction(@PathVariable Long id) {
+		accountService.deleteByTransactionId(id);
+	}
+
 	@PutMapping("/accounts/{cbu}/withdraw")
 	public Account withdraw(@PathVariable Long cbu, @RequestParam Double sum) {
+		accountService.save(new Transaction(1,sum,cbu));
 		return accountService.withdraw(cbu, sum);
 	}
 
 	@PutMapping("/accounts/{cbu}/deposit")
 	public Account deposit(@PathVariable Long cbu, @RequestParam Double sum) {
+		accountService.save(new Transaction(0,sum,cbu));
 		return accountService.deposit(cbu, sum);
 	}
 
